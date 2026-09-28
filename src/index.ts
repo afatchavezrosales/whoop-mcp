@@ -32,6 +32,7 @@ export { WhoopTokenVault } from "./token-vault";
 // Rutas propias además de las del provider:
 //   POST /webhooks/whoop     webhooks de WHOOP verificados → reenvío firmado
 //   POST /mcp/disconnect     (Bearer) el usuario se desconecta de WHOOP
+//   GET  /icon.svg           icono del servidor (serverInfo.icons)
 // =============================================================================
 
 const THIRTY_DAYS = 30 * 24 * 60 * 60;
@@ -71,7 +72,10 @@ async function disconnectWhoopUser(
 }
 
 const mcpHandler = createMcpHandler(
-	() => createWhoopMcpServer(resolveWhoopApi, () => disconnectWhoopUser(workerEnv, currentWhoopUserId())),
+	() =>
+		createWhoopMcpServer(resolveWhoopApi, () => disconnectWhoopUser(workerEnv, currentWhoopUserId()), {
+			publicBaseUrl: workerEnv.PUBLIC_BASE_URL,
+		}),
 	{ route: "/mcp" },
 );
 

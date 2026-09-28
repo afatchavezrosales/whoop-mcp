@@ -9,6 +9,7 @@ import {
 	type WhoopApi,
 } from "./whoop/api";
 import { WhoopTokenError } from "./whoop/oauth";
+import { serverIcons } from "./icon";
 
 // =============================================================================
 // Servidor MCP de WHOOP. Todas las tools de DATOS son de solo lectura
@@ -121,9 +122,19 @@ function collection(resolveApi: WhoopApiResolver, endpoint: string, args: Collec
 	return resolveApi().get(`${endpoint}${buildCollectionQuery(params)}`);
 }
 
-export function createWhoopMcpServer(resolveApi: WhoopApiResolver, disconnect?: WhoopDisconnector): McpServer {
+export interface WhoopMcpServerOptions {
+	/** URL pública del Worker: con ella se anuncia el icono (`serverInfo.icons`, spec 2025-11). */
+	publicBaseUrl?: string;
+}
+
+export function createWhoopMcpServer(
+	resolveApi: WhoopApiResolver,
+	disconnect?: WhoopDisconnector,
+	options: WhoopMcpServerOptions = {},
+): McpServer {
+	const icons = serverIcons(options.publicBaseUrl);
 	const server = new McpServer(
-		{ name: SERVER_NAME, version: SERVER_VERSION },
+		{ name: SERVER_NAME, version: SERVER_VERSION, ...(icons ? { icons } : {}) },
 		{
 			instructions:
 				"Datos de WHOOP del usuario conectado, solo lectura. Las colecciones van de más reciente a más antigua y paginan con next_token. " +

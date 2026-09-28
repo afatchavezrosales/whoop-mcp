@@ -54,6 +54,9 @@ WHOOP ──POST /webhooks/whoop──▶ Worker ──signed POST──▶ FORW
   use, so refreshes are serialized per user and persisted before the new access token is returned.
 - `src/mcp-server.ts`: the tools. `src/webhooks.ts`: webhook verification and forwarding.
   `src/grants.ts`: listing and revoking a user's MCP grants.
+- `src/icon.ts`: the server icon, served at `GET /icon.svg` and announced in `serverInfo.icons`
+  (MCP spec 2025-11) as `${PUBLIC_BASE_URL}/icon.svg`. It is a generic heart-and-pulse glyph, not
+  the WHOOP logo: this project is not affiliated with or endorsed by WHOOP, Inc.
 
 One WHOOP user may have several MCP grants (one per client); they all share that user's vault.
 

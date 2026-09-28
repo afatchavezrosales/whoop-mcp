@@ -8,6 +8,7 @@ import {
 } from "@cloudflare/workers-oauth-provider";
 import { mcpUserIdFor } from "./grants";
 import { renderConsentPage, renderErrorPage } from "./html";
+import { ICON_PATH, iconResponse } from "./icon";
 import { SERVER_NAME, SERVER_VERSION } from "./mcp-server";
 import { vaultFor } from "./token-vault";
 import { WHOOP_API_BASE_URL, WHOOP_ENDPOINTS } from "./whoop/api";
@@ -241,6 +242,7 @@ export const authHandler = {
 		if (pathname === "/authorize" && request.method === "GET") return getAuthorize(request, env);
 		if (pathname === "/authorize" && request.method === "POST") return postAuthorize(request, env);
 		if (pathname === WHOOP_CALLBACK_PATH && request.method === "GET") return getCallback(request, env);
+		if (pathname === ICON_PATH) return iconResponse(request);
 		if (pathname === "/favicon.ico") return new Response(null, { status: 204 });
 		return new Response("Not found", { status: 404 });
 	},

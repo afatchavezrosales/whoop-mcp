@@ -210,6 +210,16 @@ describe("flujo OAuth completo + tools", () => {
 	it("conecta, lista las tools (todas de solo lectura salvo disconnect_whoop) y consulta la recuperación", async () => {
 		const { accessToken } = await connect();
 
+		// El handshake anuncia el icono servido por el propio Worker (spec 2025-11).
+		const init = await rpc(accessToken, 100, "initialize", {
+			protocolVersion: "2025-06-18",
+			capabilities: {},
+			clientInfo: { name: "test", version: "1.0.0" },
+		});
+		expect(init.result.serverInfo.icons).toEqual([
+			{ src: `${BASE}/icon.svg`, mimeType: "image/svg+xml", sizes: ["any"] },
+		]);
+
 		const list = await rpc(accessToken, 1, "tools/list");
 		const tools = list.result.tools as Array<{ name: string; annotations?: { readOnlyHint?: boolean; destructiveHint?: boolean } }>;
 		expect(tools.map((t) => t.name).sort()).toEqual([

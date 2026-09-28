@@ -79,6 +79,28 @@ describe("/mcp exige autenticación", () => {
 	});
 });
 
+describe("icono del servidor", () => {
+	it("GET /icon.svg sirve un SVG propio, cacheable y sin scripts", async () => {
+		const response = await call("/icon.svg");
+		expect(response.status).toBe(200);
+		expect(response.headers.get("Content-Type")).toMatch(/^image\/svg\+xml/);
+		expect(response.headers.get("X-Content-Type-Options")).toBe("nosniff");
+		expect(response.headers.get("Content-Security-Policy")).toContain("default-src 'none'");
+		expect(response.headers.get("Cross-Origin-Resource-Policy")).toBe("cross-origin");
+		const svg = await response.text();
+		expect(svg.startsWith("<svg")).toBe(true);
+		expect(svg).not.toMatch(/<script|href=|on[a-z]+=/i);
+	});
+
+	it("HEAD /icon.svg responde sin cuerpo y otros métodos dan 405", async () => {
+		const head = await call("/icon.svg", { method: "HEAD" });
+		expect(head.status).toBe(200);
+		expect(await head.text()).toBe("");
+		const post = await call("/icon.svg", { method: "POST" });
+		expect(post.status).toBe(405);
+	});
+});
+
 describe("sin secretos de WHOOP", () => {
 	it("GET / informa de que WHOOP no está configurado, sin exponer secretos", async () => {
 		const response = await call("/");
