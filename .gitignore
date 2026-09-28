@@ -1,0 +1,11 @@
+node_modules/
+.wrangler/
+.dev.vars
+.dev.vars.*
+!.dev.vars.example
+.env
+.env.*
+*.log
+# Private deployment config with real account/namespace ids and URL.
+wrangler.local.jsonc
+.DS_Store

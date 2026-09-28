@@ -1,0 +1,8 @@
+# Copy to .dev.vars for `npm run dev` (never committed). No values here on purpose.
+WHOOP_CLIENT_ID=
+WHOOP_CLIENT_SECRET=
+# 32+ random characters, e.g. `openssl rand -hex 32`
+CONSENT_SECRET=
+# Optional: webhook forwarding (comma-separated https URLs + 32+ char signing secret)
+FORWARD_WEBHOOK_URLS=
+FORWARD_WEBHOOK_SECRET=

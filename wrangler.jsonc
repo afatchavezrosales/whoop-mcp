@@ -1,0 +1,55 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  // Public template. Your real ids can live in a gitignored copy
+  // (`wrangler.local.jsonc`, deploy with `npm run deploy:local`). See README.
+  "name": "whoop-mcp",
+  // Uses the account you are logged into with `wrangler login`
+  // (or CLOUDFLARE_ACCOUNT_ID). Add "account_id" here if you have several.
+  "main": "src/index.ts",
+  "compatibility_date": "2026-08-20",
+  // nodejs_compat: required by agents / the MCP SDK.
+  // global_fetch_strictly_public: required by workers-oauth-provider to accept
+  // Client ID Metadata Documents (CIMD) without SSRF risk.
+  "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
+  "workers_dev": true,
+  "preview_urls": false,
+  "vars": {
+    // CHANGE ME: canonical public URL of your Worker (no trailing slash). The
+    // OAuth resource is `${PUBLIC_BASE_URL}/mcp`: tokens are bound to it.
+    "PUBLIC_BASE_URL": "https://whoop-mcp.your-subdomain.workers.dev"
+  },
+  // Secrets (NEVER in this file), set with `npx wrangler secret put <NAME>`:
+  //   WHOOP_CLIENT_ID, WHOOP_CLIENT_SECRET   your WHOOP developer app
+  //   CONSENT_SECRET                         32+ random chars (remembered-consent cookie)
+  //   FORWARD_WEBHOOK_SECRET                 32+ random chars (optional, webhook forwarding)
+  //   FORWARD_WEBHOOK_URLS                   comma-separated https URLs (optional)
+  "kv_namespaces": [
+    {
+      // OAuth provider storage (DCR clients, grants, token hashes, encrypted
+      // props) plus short-lived webhook de-duplication keys. No "id": wrangler
+      // creates the namespace on the first deploy (automatic provisioning).
+      "binding": "OAUTH_KV"
+    }
+  ],
+  "durable_objects": {
+    "bindings": [
+      {
+        // One object per WHOOP user: stores and (serially) refreshes their WHOOP token.
+        "name": "WHOOP_TOKEN_VAULT",
+        "class_name": "WhoopTokenVault"
+      }
+    ]
+  },
+  "migrations": [
+    {
+      "tag": "v1",
+      "new_sqlite_classes": ["WhoopTokenVault"]
+    }
+  ],
+  "observability": {
+    "enabled": true
+  },
+  "dev": {
+    "port": 8788
+  }
+}
