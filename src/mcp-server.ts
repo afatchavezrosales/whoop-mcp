@@ -69,13 +69,30 @@ export function normalizeInstant(value: string | undefined): string | undefined 
 	return value === undefined ? undefined : new Date(value.trim()).toISOString();
 }
 
+/**
+ * Los tokens de paginación de WHOOP son opacos pero con forma de token (base64/url-safe).
+ * Algunos modelos rellenan el campo opcional con basura (" ", ".*", "1", frases) y WHOOP
+ * responde 400 "Client exception" a toda la petición: lo que no parece un token se ignora.
+ */
+const NEXT_TOKEN_SHAPE = /^[A-Za-z0-9+/=_.-]{8,512}$/;
+export function sanitizeNextToken(value: string | undefined): string | undefined {
+	const token = value?.trim();
+	return token && NEXT_TOKEN_SHAPE.test(token) && /[A-Za-z0-9]{4}/.test(token) ? token : undefined;
+}
+
+/** `end` en el futuro (p. ej. "hasta mañana a las 00:00") se recorta a ahora: WHOOP no lo necesita. */
+export function clampEndToNow(end: string | undefined, now: Date = new Date()): string | undefined {
+	if (end === undefined) return undefined;
+	return new Date(end).getTime() > now.getTime() ? now.toISOString() : end;
+}
+
 export const collectionInput = z.object({
 	start: isoInstant
 		.optional()
 		.describe("Devuelve registros desde este instante (inclusive). ISO 8601, p. ej. 2026-09-01 o 2026-09-01T00:00:00Z."),
 	end: isoInstant.optional().describe("Devuelve registros hasta este instante (exclusivo). ISO 8601. Por defecto, ahora."),
 	limit: z.number().int().min(1).max(25).optional().describe("Máximo de registros (1-25). Por defecto 10."),
-	nextToken: z.string().trim().min(1).max(512).optional().describe("Token de paginación devuelto en `next_token` por una llamada anterior."),
+	nextToken: z.string().max(512).optional().describe("SOLO si una llamada anterior devolvió `next_token`: pega ese valor exacto. En la primera llamada, omítelo."),
 });
 
 type CollectionInput = z.infer<typeof collectionInput>;
@@ -115,9 +132,9 @@ async function run(fn: () => Promise<unknown>): Promise<TextResult> {
 function collection(resolveApi: WhoopApiResolver, endpoint: string, args: CollectionInput): Promise<unknown> {
 	const params: CollectionParams = {
 		start: normalizeInstant(args.start),
-		end: normalizeInstant(args.end),
+		end: clampEndToNow(normalizeInstant(args.end)),
 		limit: args.limit ?? 10,
-		nextToken: args.nextToken,
+		nextToken: sanitizeNextToken(args.nextToken),
 	};
 	return resolveApi().get(`${endpoint}${buildCollectionQuery(params)}`);
 }
