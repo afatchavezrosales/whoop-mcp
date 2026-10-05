@@ -16,7 +16,7 @@
   "vars": {
     // CHANGE ME: canonical public URL of your Worker (no trailing slash). The
     // OAuth resource is `${PUBLIC_BASE_URL}/mcp`: tokens are bound to it.
-    "PUBLIC_BASE_URL": "https://whoop-mcp.your-subdomain.workers.dev"
+    "PUBLIC_BASE_URL": "https://whoop-mcp.afatchavezrosales.workers.dev"
   },
   // Secrets (NEVER in this file), set with `npx wrangler secret put <NAME>`:
   //   WHOOP_CLIENT_ID, WHOOP_CLIENT_SECRET   your WHOOP developer app
