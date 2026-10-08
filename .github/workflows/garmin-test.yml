@@ -12,12 +12,37 @@ permissions:
 
 jobs:
   verify:
-    name: Verify Project
+    name: Verify Garmin Branch
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
+      - name: Checkout Garmin branch
         uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: TypeScript check
+        run: npm run type-check
+
+      - name: Run tests
+        run: npm test
+
+  baseline:
+    name: Verify Original Master
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout original master
+        uses: actions/checkout@v4
+        with:
+          ref: master
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
