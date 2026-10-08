@@ -2,27 +2,34 @@
 name: Garmin Integration Check
 
 on:
+  push:
+    branches:
+      - feature/garmin-integration
   workflow_dispatch:
+
+permissions:
+  contents: read
 
 jobs:
   verify:
+    name: Verify Project
     runs-on: ubuntu-latest
 
     steps:
-      - name: Descargar repositorio
+      - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Preparar Node.js
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '24'
           cache: npm
 
-      - name: Instalar dependencias
+      - name: Install dependencies
         run: npm ci
 
-      - name: Verificar TypeScript
+      - name: TypeScript check
         run: npm run type-check
 
-      - name: Ejecutar pruebas
+      - name: Run tests
         run: npm test
